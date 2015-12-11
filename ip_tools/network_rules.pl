@@ -19,6 +19,7 @@ ip_int(IP,Numeric) :-
   N1 is (Numeric /\ (Mask<<24)) >>24,
   atomic_list_concat([N1,N2,N3,N4],'.',IP).
 
+/***
 % calculates Min and Max as numeric IP for Network mask 
 mask_min_max(Mask,Min,Max) :-
   atomic_list_concat([MinIP,Bits],'/',Mask),
@@ -30,15 +31,24 @@ ip_mask(IP,Mask) :-
   mask_min_max(Mask,Min,Max),  
   between(Min,Max,Num),
   ip_int(IP,Num).
-  
+  ***/
+
 bit_mask(Bits,Mask) :-
    Mask is 1<<32 - 1<<(32-Bits).
-  
+
 ip_nw(IP,SubnetBits,NW) :-
+  atom(IP),
   ip_int(IP,Num),
-  bit_mask(SubnetBits,Mask),
+  Mask is 1<<32 - 1<<(32-SubnetBits),
   NWNum is Mask /\ Num,
   ip_int(NW,NWNum).
+
+ip_nw(IP,SubnetBits,NW) :-
+  atom(NW),
+  ip_int(NW,Min),
+  Max is Min + (1 << (32-SubnetBits)) - 1,
+  between(Min,Max,Num),
+  ip_int(IP,Num).
   
 
 networks_to_pairs([],[]). 
